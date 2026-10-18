@@ -27,7 +27,7 @@ car-price-mlops/
 |   `-- PROVENANCE.md        # 数据和模型的来龙去脉
 |-- data/
 |   |-- cars_v1.csv          # 数据集第 1 版（120 行，含 4 行错误）
-|   |-- cars_v1.csv.dvc      # DVC 指针文件
+|   |-- cars_v1.csv.dvc      # DVC 指针文件（运行 dvc add 后生成）
 |   |-- cars_v2.csv          # 数据集第 2 版（136 行，已清洗）
 |   `-- cars_v2.csv.dvc
 |-- models/
@@ -52,8 +52,13 @@ car-price-mlops/
 # 1. 建虚拟环境
 python -m venv .venv
 
-# 2. 装依赖
-.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+# 2. 装依赖（分两步更稳，mlflow 和 dvc 依赖多、装得慢）
+.\.venv\Scripts\python.exe -m pip install fastapi uvicorn scikit-learn joblib pytest httpx ruff pyyaml
+.\.venv\Scripts\python.exe -m pip install mlflow
+.\.venv\Scripts\python.exe -m pip install dvc
+
+# 或者一次装完：
+# .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 
 # 3. 生成数据（两份 CSV）
 .\.venv\Scripts\python.exe ml\make_data.py
