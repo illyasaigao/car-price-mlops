@@ -1,4 +1,5 @@
 [core]
     remote = storage
+    analytics = false
 ['remote "storage"']
     url = D:\111\dvc-storage
