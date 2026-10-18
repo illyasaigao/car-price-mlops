@@ -132,6 +132,16 @@ dvc push
 - 切换版本：`git checkout <提交号>` 再 `dvc checkout`；换台机器用 `dvc pull`。
 - 换 Azure 远端只要改一行：`dvc remote add -d storage azure://<容器>/car-price`
 
+> **Windows 提示**：如果 `dvc` 一运行就报 `[WinError 5] 拒绝访问: 'C:\ProgramData\iterative'`，说明 DVC 想在系统目录存配置但没有权限。用三个用户环境变量把它的目录指到自己账号下即可（不需要管理员）：
+>
+> ```powershell
+> setx DVC_SITE_CACHE_DIR   "%LOCALAPPDATA%\dvc\site"
+> setx DVC_GLOBAL_CONFIG_DIR "%LOCALAPPDATA%\dvc\config"
+> setx DVC_SYSTEM_CONFIG_DIR "%LOCALAPPDATA%\dvc\system"
+> ```
+>
+> 执行后**关掉 PowerShell 重新打开**，再跑 `dvc status`。
+
 ### 实验追踪（MLflow）
 
 ```powershell
