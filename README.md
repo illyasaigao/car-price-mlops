@@ -49,13 +49,14 @@ car-price-mlops/
 ## 怎么跑起来（Windows PowerShell）
 
 ```powershell
-# 1. 建虚拟环境
-python -m venv .venv
+# 1. 建虚拟环境（用 py，不要用 python：Windows 上的 python 可能是应用商店占位程序）
+py -m venv .venv
+Test-Path .venv\Scripts\python.exe    # 必须输出 True
 
-# 2. 装依赖（分两步更稳，mlflow 和 dvc 依赖多、装得慢）
+# 2. 装依赖（分三步更稳，mlflow 和 dvc 依赖多、装得慢）
 .\.venv\Scripts\python.exe -m pip install fastapi uvicorn scikit-learn joblib pytest httpx ruff pyyaml
 .\.venv\Scripts\python.exe -m pip install mlflow
-.\.venv\Scripts\python.exe -m pip install dvc
+.\.venv\Scripts\python.exe -m pip install --no-cache-dir dvc
 
 # 或者一次装完：
 # .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
