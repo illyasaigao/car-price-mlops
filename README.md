@@ -111,7 +111,7 @@ docker build -t car-price-mlops .
 docker run -p 8000:8000 car-price-mlops
 ```
 
-镜像里只有 `app/`、`models/` 和运行依赖；`tests/`、`ml/`、`data/` 都被 `.dockerignore` 排除了。
+镜像里只有 `app/`、`ml/`、`models/` 和运行依赖；`tests/`、`data/`、`mlruns/` 都被 `.dockerignore` 排除了。
 
 ## MLOps 部分
 
@@ -119,13 +119,16 @@ docker run -p 8000:8000 car-price-mlops
 
 ```powershell
 dvc init
-dvc add data/cars_v1.csv data/cars_v2.csv
-dvc remote add -d storage D:\dvc-storage
+dvc add data/cars_v1.csv
+dvc add data/cars_v2.csv
+dvc remote add -d storage D:\111\dvc-storage
 dvc push
 ```
 
 - `dvc add` 会把真正的 CSV 存进 DVC 的缓存，Git 里只留一个很小的 `.dvc` 指针文件。
-- 想切换回某个版本的数据，用 `git checkout <提交号>` 再 `dvc checkout`。
+- 两版数据的指纹（存在 `.dvc` 文件里）：v1 = `60c4feee…`，v2 = `c4de486c…`，和 `models/metrics.json` 里的 `dataset_hash` 对得上。
+- 数据被改坏时 `dvc status` 会报 `modified`，用 `dvc checkout --force` 还原。
+- 切换版本：`git checkout <提交号>` 再 `dvc checkout`；换台机器用 `dvc pull`。
 - 换 Azure 远端只要改一行：`dvc remote add -d storage azure://<容器>/car-price`
 
 ### 实验追踪（MLflow）
@@ -134,10 +137,11 @@ dvc push
 .\.venv\Scripts\python.exe -m mlflow ui
 ```
 
-浏览器打开 <http://127.0.0.1:5000>，能看到 `car-price` 实验下的两次运行：
+浏览器打开 <http://127.0.0.1:5000>，能看到 `car-price` 实验下的三次运行：
 
 - `linear`：线性回归（基线）
-- `forest`：随机森林（改进）
+- `linear_age2`：线性回归 + 特征工程（上线）
+- `forest`：随机森林
 
 每次运行都记录了：模型类型、训练行数、**数据集哈希**、**git 提交号**、参数、MAE、R²、模型文件。
 

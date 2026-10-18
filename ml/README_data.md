@@ -72,8 +72,30 @@ dvc add data/cars_v2.csv
 执行完，项目里会多出：
 
 - `data/cars_v1.csv.dvc`、`data/cars_v2.csv.dvc` —— 两个很小的指针文件（里面只有一个哈希值），**这两个会进 Git**；
-- `.gitignore` 里会自动多出 `/cars_v1.csv`、`/cars_v2.csv`，保证原始 CSV **不进 Git**；
+- 原始 CSV **不进 Git**（根目录 `.gitignore` 已经排除，DVC 就不再重复生成 `data/.gitignore`）；
 - 真正的 CSV 被复制到 `.dvc/cache/` 里。
+
+实际生成的指针内容（可以直接拿来讲）：
+
+```yaml
+# data/cars_v1.csv.dvc
+outs:
+- md5: 60c4feee9a3395029af3718015f5c95b
+  size: 2729
+  hash: md5
+  path: cars_v1.csv
+```
+
+```yaml
+# data/cars_v2.csv.dvc
+outs:
+- md5: c4de486c2b697f310979f62419e15e5d
+  size: 3086
+  hash: md5
+  path: cars_v2.csv
+```
+
+**v2 的 `c4de486c` 和 `models/metrics.json` 里的 `dataset_hash` 是同一个值**，这就是“模型 ← 数据”的可追溯证据。
 
 ### 配置远端（课程要求 MS Azure）
 
@@ -88,11 +110,21 @@ dvc push
 **没有 Azure 账号怎么办？** 用本地文件夹当远端也能完整演示流程，命令只差一个地址：
 
 ```powershell
-dvc remote add -d storage D:\dvc-storage
+dvc remote add -d storage D:\111\dvc-storage
 dvc push
 ```
 
-（本项目在演示环境里就是用本地文件夹当远端，这样不依赖网络和云账号。答辩时说明“把地址换成 azure:// 就是真正的 Azure 远端”即可。）
+（本项目在演示环境里就是用本地文件夹当远端，已实测 `2 files pushed`。答辩时说明“把地址换成 azure:// 就是真正的 Azure 远端”即可。）
+
+### 数据被改坏时怎么还原
+
+```powershell
+dvc status              # 会显示 modified: data\cars_v2.csv
+dvc checkout --force    # 还原成登记的那一版
+dvc status              # Data and pipelines are up to date.
+```
+
+不加 `--force` 时 DVC 会拒绝覆盖未保存的修改，这是保护机制。
 
 ### 版本怎么对应
 
