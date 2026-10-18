@@ -1,0 +1,20 @@
+# 这些东西不需要进镜像，镜像越小越安全
+.venv
+.libs
+.git
+.github
+.gitignore
+.dvc
+.dvcignore
+.data
+data
+mlruns
+tests
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.env
+README.md
+DEPLOYMENT.md
+requirements-dev.txt

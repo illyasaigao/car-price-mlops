@@ -1,0 +1,26 @@
+{
+  "best_model": "linear_age2",
+  "feature_set": "age2",
+  "dataset": "cars_v2.csv",
+  "dataset_hash": "c4de486c",
+  "git_commit": "no-git",
+  "train_rows": 109,
+  "test_rows": 27,
+  "results": {
+    "linear": {
+      "mae": 1298.71,
+      "r2": 0.961,
+      "feature_set": "raw"
+    },
+    "linear_age2": {
+      "mae": 550.57,
+      "r2": 0.9933,
+      "feature_set": "age2"
+    },
+    "forest": {
+      "mae": 1565.94,
+      "r2": 0.9256,
+      "feature_set": "raw"
+    }
+  }
+}

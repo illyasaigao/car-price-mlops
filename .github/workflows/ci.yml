@@ -1,0 +1,56 @@
+name: CI
+
+# 什么时候跑：
+#   1. 往 dev / staging / main 提 Pull Request 时（也就是有人想合并代码时）
+#   2. 直接往这三个分支 push 时
+on:
+  pull_request:
+    branches: [dev, staging, main]
+  push:
+    branches: [dev, staging, main]
+
+jobs:
+  # 第一个任务：检查代码 + 跑测试
+  test:
+    name: 测试和代码检查
+    runs-on: ubuntu-latest
+    steps:
+      - name: 把仓库代码下载到 CI 机器上
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install -r requirements-dev.txt
+
+      - name: 重新生成数据（CI 里不连 DVC 远端，直接用脚本造数据）
+        run: python ml/make_data.py
+
+      - name: 代码检查（ruff）
+        run: ruff check .
+
+      - name: 跑测试（pytest）
+        run: python -m pytest -q
+
+  # 第二个任务：确认 Docker 镜像能构建成功
+  # needs: test 表示第一个任务失败了，这个任务就不会跑
+  docker:
+    name: 构建 Docker 镜像
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 构建镜像
+        run: docker build -t car-price-mlops:test .
+
+      - name: 用镜像启动容器，检查健康接口
+        run: |
+          docker run -d --name app -p 8000:8000 car-price-mlops:test
+          sleep 5
+          curl -f http://127.0.0.1:8000/health
+          docker logs app
+          docker stop app

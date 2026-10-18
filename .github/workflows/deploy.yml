@@ -1,0 +1,53 @@
+name: Deploy
+
+# 只有 push（合并）到 staging 或 main 时才跑
+on:
+  push:
+    branches: [staging, main]
+
+jobs:
+  # 合并到 staging：构建 staging 镜像
+  staging:
+    if: github.ref == 'refs/heads/staging'
+    name: 构建 staging 镜像
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 用 staging 的 secrets 生成 .env 文件
+        run: echo "${{ secrets.STAGING_ENV }}" > .env
+
+      - name: 登录 Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 构建并推送 staging 镜像
+        run: |
+          docker build --build-arg APP_ENV=staging -t "${{ secrets.DOCKERHUB_USERNAME }}/car-price-mlops:staging" .
+          docker push "${{ secrets.DOCKERHUB_USERNAME }}/car-price-mlops:staging"
+
+  # 合并到 main：构建生产镜像
+  production:
+    if: github.ref == 'refs/heads/main'
+    name: 构建生产镜像
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 用生产环境的 secrets 生成 .env 文件
+        run: echo "${{ secrets.PRODUCTION_ENV }}" > .env
+
+      - name: 登录 Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 构建并推送生产镜像
+        run: |
+          docker build --build-arg APP_ENV=production -t "${{ secrets.DOCKERHUB_USERNAME }}/car-price-mlops:latest" .
+          docker build --build-arg APP_ENV=production -t "${{ secrets.DOCKERHUB_USERNAME }}/car-price-mlops:sha-${{ github.sha }}" .
+          docker push "${{ secrets.DOCKERHUB_USERNAME }}/car-price-mlops:latest"
+          docker push "${{ secrets.DOCKERHUB_USERNAME }}/car-price-mlops:sha-${{ github.sha }}"

@@ -1,0 +1,2 @@
+# ruff 是代码检查工具，这里是它的配置：不用检查这些文件夹
+exclude = [".venv", ".libs", "mlruns", "data"]

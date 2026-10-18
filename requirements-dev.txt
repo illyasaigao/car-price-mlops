@@ -1,0 +1,16 @@
+# 开发和训练额外需要的包
+-r requirements.txt
+
+# 测试
+pytest==9.1.1
+httpx==0.28.1
+
+# 代码检查
+ruff==0.17.1
+
+# 实验追踪（MLflow）
+mlflow
+pyyaml==6.0.3
+
+# 数据版本管理（DVC）
+dvc

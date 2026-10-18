@@ -1,0 +1,8 @@
+# 训练参数。改这里的数字就能做新的实验（MLflow 会把它们记下来）。
+test_size: 0.2
+random_state: 42
+
+# 改进版模型（随机森林）的参数
+forest:
+  n_estimators: 30
+  max_depth: 6

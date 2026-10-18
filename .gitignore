@@ -1,0 +1,25 @@
+# Python 虚拟环境
+.venv/
+.libs/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 测试缓存
+.pytest_cache/
+.ruff_cache/
+
+# 秘密文件（.env 里放密码，绝对不能提交）
+.env
+
+# MLflow 的运行记录（本地数据，不提交）
+mlruns/
+
+# DVC 的临时文件
+.dvc/tmp/
+
+# 原始数据不进 Git，由 DVC 管理（真正的数据在 DVC 缓存/远端里）
+# 执行 dvc add 之后，DVC 会自动往这里补两行，效果一样
+/data/cars_v1.csv
+/data/cars_v2.csv
