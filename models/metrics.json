@@ -3,7 +3,7 @@
   "feature_set": "age2",
   "dataset": "cars_v2.csv",
   "dataset_hash": "c4de486c",
-  "git_commit": "no-git",
+  "git_commit": "ab280f0",
   "train_rows": 109,
   "test_rows": 27,
   "results": {
