@@ -131,9 +131,7 @@ def main():
 
     results = {}
     for name, model, feature_set, X, y in experiments:
-        result = train_one(
-            name, model, feature_set, X, y, data_hash, commit, params
-        )
+        result = train_one(name, model, feature_set, X, y, data_hash, commit, params)
         results[name] = result
 
     # 谁的 MAE 小，就让谁上线
