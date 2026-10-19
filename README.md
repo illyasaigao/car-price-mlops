@@ -164,7 +164,7 @@ dvc push
 feature/*  --PR-->  dev  --PR-->  staging  --PR-->  main
 ```
 
-- 往 `dev` / `staging` / `main` 提 PR，CI 会自动跑：ruff 检查 → pytest → docker build → 起容器测 `/health`。
+- 往 `dev` / `staging` / `main` 提 PR，CI 会自动跑：`ruff check`（lint）→ `ruff format --check`（格式）→ `pytest`（17 个测试）→ `docker build` → 起容器测 `/health`。
 - 合并到 `staging`：`deploy.yml` 用 staging 的 secrets 生成 `.env`，构建 `:staging` 镜像。
 - 合并到 `main`：用生产 secrets 生成 `.env`，构建 `:latest` 和 `:sha-<提交号>` 镜像。
 

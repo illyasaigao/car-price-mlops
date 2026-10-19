@@ -107,6 +107,37 @@ dvc push
 
 需要先装 Azure 支持：`pip install "dvc[azure]"`，并配好 Azure 凭证。
 
+#### 有 Azure 账号的话，这样配（6 步，约 15 分钟）
+
+1. 登录 <https://portal.azure.com> → **Create a resource** → 搜索 **Storage account** → Create
+   - 资源组随便新建一个（例如 `mlops-rg`）
+   - 存储账户名必须全局唯一，例如 `carprice2026`
+   - Region 选离你近的（例如 `Southeast Asia`）
+   - 其余默认，Create，等 1 分钟
+2. 进入这个存储账户 → 左侧 **Data storage → Containers** → **+ Container**
+   - 名字填 `dvc`，访问级别选 Private → Create
+3. 在存储账户首页 → **Security + networking → Access keys** → 点 **Show keys**
+   - 复制 **Connection string**（`key1` 那一行）
+4. 在 PowerShell 里把凭证设成环境变量（**别写进代码**）：
+
+   ```powershell
+   $env:AZURE_STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=carprice2026;AccountKey=...;EndpointSuffix=core.windows.net"
+   ```
+
+5. 装 Azure 支持并切换远端：
+
+   ```powershell
+   .\.venv\Scripts\python.exe -m pip install "dvc[azure]"
+   .\.venv\Scripts\python.exe -m dvc remote add -d storage azure://dvc/car-price
+   .\.venv\Scripts\python.exe -m dvc push
+   ```
+
+   （`azure://容器名/路径`，容器名是第 2 步建的 `dvc`）
+
+6. 验证：打开 Azure 门户 → 容器 `dvc` → 应该能看到 `car-price/` 目录下出现两个以 md5 命名的文件。
+
+> 想长期免输凭证，可以把第 4 步那条 `setx` 写成用户环境变量；但**绝对不要把 Connection string 提交到 Git**。
+
 **没有 Azure 账号怎么办？** 用本地文件夹当远端也能完整演示流程，命令只差一个地址：
 
 ```powershell
