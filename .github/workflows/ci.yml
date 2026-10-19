@@ -29,8 +29,11 @@ jobs:
       - name: 重新生成数据（CI 里不连 DVC 远端，直接用脚本造数据）
         run: python ml/make_data.py
 
-      - name: 代码检查（ruff）
+      - name: 代码规范检查（ruff check = lint）
         run: ruff check .
+
+      - name: 代码格式检查（ruff format --check）
+        run: ruff format --check .
 
       - name: 跑测试（pytest）
         run: python -m pytest -q

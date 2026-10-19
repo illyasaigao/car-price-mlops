@@ -164,7 +164,7 @@ dvc push
 feature/*  --PR-->  dev  --PR-->  staging  --PR-->  main
 ```
 
-- 往 `dev` / `staging` / `main` 提 PR，CI 会自动跑：ruff 检查 → pytest → docker build → 起容器测 `/health`。
+- 往 `dev` / `staging` / `main` 提 PR，CI 会自动跑：`ruff check`（lint）→ `ruff format --check`（格式）→ `pytest`（17 个测试）→ `docker build` → 起容器测 `/health`。
 - 合并到 `staging`：`deploy.yml` 用 staging 的 secrets 生成 `.env`，构建 `:staging` 镜像。
 - 合并到 `main`：用生产 secrets 生成 `.env`，构建 `:latest` 和 `:sha-<提交号>` 镜像。
 
@@ -175,3 +175,12 @@ feature/*  --PR-->  dev  --PR-->  staging  --PR-->  main
 - 数据是**脚本生成的模拟数据**（`ml/make_data.py`），不是真实交易数据。目的是能完全复现、不涉及隐私，并且能故意造出 v1 的脏数据来演示清洗过程。
 - `models/model.pkl` 直接提交进仓库：这样 CI 和 Docker 构建不需要先重训模型。真实项目里模型应该从 MLflow Registry 拉取。
 - CI 里用 `python ml/make_data.py` 重建数据，而不是 `dvc pull`：这样 CI 不需要访问 DVC 远端和云凭证。真实项目会给 CI 配置只读的远端凭证再 `dvc pull`。
+- **DVC 远端指向本地目录**（`D:\111\dvc-storage`），不是 Azure Blob。原因是演示环境没有 Azure 订阅。DVC 的远端是纯配置项，切换只需要一行命令，其余 `dvc add / push / pull / checkout` 流程完全一致：
+
+  ```powershell
+  pip install "dvc[azure]"
+  dvc remote modify storage url azure://<容器名>/car-price
+  dvc push
+  ```
+
+  详细步骤（含建存储账户、配凭证）见 `ml/README_data.md`。
