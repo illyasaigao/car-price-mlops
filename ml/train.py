@@ -58,8 +58,14 @@ def get_git_commit():
         return "no-git"
 
 
-def train_one(name, model, feature_set, X, y, data_hash, commit, params):
-    """训练一个模型、算两个指标、记录到 MLflow，返回结果。"""
+def train_one(
+    name, model, feature_set, X, y, data_hash, commit, params, model_params=None
+):
+    """训练一个模型、算两个指标、记录到 MLflow，返回结果。
+
+    model_params 是这个模型自己的超参数（例如随机森林的 n_estimators / max_depth）。
+    线性回归没有超参数，传空字典即可，这样 MLflow 里就不会出现「不属于它的参数」。
+    """
     # 同一个 random_state 保证三个实验用的是同一份训练集和测试集
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=params["test_size"], random_state=params["random_state"]
@@ -82,6 +88,10 @@ def train_one(name, model, feature_set, X, y, data_hash, commit, params):
         mlflow.log_param("test_size", params["test_size"])
         mlflow.log_param("random_state", params["random_state"])
 
+        # 记这个模型自己的超参数：森林的 n_estimators / max_depth 就在这里进 MLflow
+        if model_params:
+            mlflow.log_params(model_params)
+
         # 记指标：用来比较模型好坏
         mlflow.log_metric("mae", mae)
         mlflow.log_metric("r2", r2)
@@ -92,7 +102,15 @@ def train_one(name, model, feature_set, X, y, data_hash, commit, params):
         mlflow.log_artifact(str(model_path))
 
         print(f"{name:<12} MAE = {mae:6.0f}   R2 = {r2:.3f}")
-        return {"mae": mae, "r2": r2, "feature_set": feature_set, "model": model}
+        return {
+            "mae": mae,
+            "r2": r2,
+            "feature_set": feature_set,
+            "model": model,
+            # 记录真实切分后的行数：136 行按 8:2 切，sklearn 会得到 108 / 28
+            "train_rows": len(X_train),
+            "test_rows": len(X_test),
+        }
 
 
 def main():
@@ -114,8 +132,8 @@ def main():
     mlflow.set_experiment("car-price")
 
     experiments = [
-        ("linear", LinearRegression(), "raw", X_raw, y_raw),
-        ("linear_age2", LinearRegression(), "age2", X_age2, y_age2),
+        ("linear", LinearRegression(), "raw", X_raw, y_raw, {}),
+        ("linear_age2", LinearRegression(), "age2", X_age2, y_age2, {}),
         (
             "forest",
             RandomForestRegressor(
@@ -126,12 +144,26 @@ def main():
             "raw",
             X_raw,
             y_raw,
+            {
+                "n_estimators": params["forest"]["n_estimators"],
+                "max_depth": params["forest"]["max_depth"],
+            },
         ),
     ]
 
     results = {}
-    for name, model, feature_set, X, y in experiments:
-        result = train_one(name, model, feature_set, X, y, data_hash, commit, params)
+    for name, model, feature_set, X, y, model_params in experiments:
+        result = train_one(
+            name,
+            model,
+            feature_set,
+            X,
+            y,
+            data_hash,
+            commit,
+            params,
+            model_params,
+        )
         results[name] = result
 
     # 谁的 MAE 小，就让谁上线
@@ -145,8 +177,8 @@ def main():
         "dataset": DATA_PATH.name,
         "dataset_hash": data_hash,
         "git_commit": commit,
-        "train_rows": len(X_raw) - int(len(X_raw) * params["test_size"]),
-        "test_rows": int(len(X_raw) * params["test_size"]),
+        "train_rows": best["train_rows"],
+        "test_rows": best["test_rows"],
         "results": {
             name: {
                 "mae": round(r["mae"], 2),
