@@ -59,7 +59,8 @@ Docker Hub Token 在这里生成：Docker Hub → Account settings → Security 
 | setup-python | 装 Python 3.12 |
 | pip install | 装 `requirements-dev.txt` |
 | make_data | 重建两份 CSV（CI 不连 DVC 远端） |
-| ruff check | 代码检查，有低级错误就失败 |
+| ruff check | 代码检查（lint：未使用变量、语法隐患等），有错误就失败 |
+| ruff format --check | 代码格式检查（相当于 black 的作用），格式不统一就失败 |
 | pytest | 跑所有测试，有失败就失败 |
 | docker build | 构建镜像，失败就失败 |
 | docker run + curl | 真起一个容器，请求 `/health`，确认服务能跑 |
