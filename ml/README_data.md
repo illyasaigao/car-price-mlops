@@ -1,4 +1,4 @@
-﻿# 数据说明（README_data.md）
+# 数据说明（README_data.md）
 
 ## 1. 数据是什么
 
