@@ -99,53 +99,54 @@ outs:
 
 ### 配置远端（课程要求 MS Azure）
 
-```powershell
-# 课程要求用 Azure Blob Storage
-dvc remote add -d storage azure://<你的容器名>/car-price
-dvc push
+本项目已按课程要求配置好 Azure Blob Storage 远端，实测 `dvc push` 输出 `2 files pushed`。
+
+| 项 | 值 |
+| --- | --- |
+| 远端名 | `mazure`（默认远端） |
+| storage account | `wut2026` |
+| container | `dvc` |
+| URL | `azure://dvc/car-price` |
+| 凭证 | SAS 令牌，存在 `.dvc/config.local`（**被 Git 忽略，不进仓库**） |
+
+`.dvc/config` 里只有地址和账户名，可以安全提交：
+
+```ini
+[core]
+    remote = mazure
+['remote "mazure"']
+    url = azure://dvc/car-price
+    account_name = wut2026
+['remote "storage"']
+    url = D:\111\dvc-storage
 ```
 
-需要先装 Azure 支持：`pip install "dvc[azure]"`，并配好 Azure 凭证。
-
-#### 有 Azure 账号的话，这样配（6 步，约 15 分钟）
-
-1. 登录 <https://portal.azure.com> → **Create a resource** → 搜索 **Storage account** → Create
-   - 资源组随便新建一个（例如 `mlops-rg`）
-   - 存储账户名必须全局唯一，例如 `carprice2026`
-   - Region 选离你近的（例如 `Southeast Asia`）
-   - 其余默认，Create，等 1 分钟
-2. 进入这个存储账户 → 左侧 **Data storage → Containers** → **+ Container**
-   - 名字填 `dvc`，访问级别选 Private → Create
-3. 在存储账户首页 → **Security + networking → Access keys** → 点 **Show keys**
-   - 复制 **Connection string**（`key1` 那一行）
-4. 在 PowerShell 里把凭证设成环境变量（**别写进代码**）：
-
-   ```powershell
-   $env:AZURE_STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=carprice2026;AccountKey=...;EndpointSuffix=core.windows.net"
-   ```
-
-5. 装 Azure 支持并切换远端：
-
-   ```powershell
-   .\.venv\Scripts\python.exe -m pip install "dvc[azure]"
-   .\.venv\Scripts\python.exe -m dvc remote add -d storage azure://dvc/car-price
-   .\.venv\Scripts\python.exe -m dvc push
-   ```
-
-   （`azure://容器名/路径`，容器名是第 2 步建的 `dvc`）
-
-6. 验证：打开 Azure 门户 → 容器 `dvc` → 应该能看到 `car-price/` 目录下出现两个以 md5 命名的文件。
-
-> 想长期免输凭证，可以把第 4 步那条 `setx` 写成用户环境变量；但**绝对不要把 Connection string 提交到 Git**。
-
-**没有 Azure 账号怎么办？** 用本地文件夹当远端也能完整演示流程，命令只差一个地址：
+换台机器重做一遍时的完整命令：
 
 ```powershell
-dvc remote add -d storage D:\111\dvc-storage
-dvc push
+.\.venv\Scripts\python.exe -m pip install "dvc[azure]"
+.\.venv\Scripts\python.exe -m dvc remote add -d mazure azure://dvc/car-price
+.\.venv\Scripts\python.exe -m dvc remote modify mazure account_name wut2026
+.\.venv\Scripts\python.exe -m dvc remote modify --local mazure sas_token "<SAS 令牌>"
+.\.venv\Scripts\python.exe -m dvc push
 ```
 
-（本项目在演示环境里就是用本地文件夹当远端，已实测 `2 files pushed`。答辩时说明“把地址换成 azure:// 就是真正的 Azure 远端”即可。）
+**密钥为什么不进 Git**：`--local` 把凭证写进 `.dvc/config.local`，而 `.dvc/.gitignore` 里有 `/config.local`，所以它永远不会被提交。
+
+**验证远端里真的有文件**（不需要 Azure 门户权限）：
+
+```powershell
+.\.venv\Scripts\python.exe -c "from azure.storage.blob import ContainerClient; tok=open('.dvc/config.local',encoding='utf-8').read().split('sas_token = ')[1].strip(); c=ContainerClient('https://wut2026.blob.core.windows.net','dvc',credential=tok); [print(b.name, b.size) for b in c.list_blobs(name_starts_with='car-price')]"
+```
+
+输出两行（文件名就是数据的 md5）：
+
+```text
+car-price/files/md5/60/c4feee9a3395029af3718015f5c95b 2729
+car-price/files/md5/c4/de486c2b697f310979f62419e15e5d 3086
+```
+
+**本地备用远端**：仓库里还留了一个本地目录远端 `storage`（`D:\111\dvc-storage`），没网时可以用 `dvc push -r storage` 演示。
 
 ### 数据被改坏时怎么还原
 
