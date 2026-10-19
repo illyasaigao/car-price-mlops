@@ -72,6 +72,9 @@ Docker Hub Token 在这里生成：Docker Hub → Account settings → Security 
 | staging | push 到 `staging` | 用 `STAGING_ENV` 生成 `.env` → 构建 `:staging` 镜像 → 推送 |
 | production | push 到 `main` | 用 `PRODUCTION_ENV` 生成 `.env` → 构建 `:latest` 和 `:sha-<提交号>` → 推送 |
 
+> **`.env` 怎么用**：流水线会把 secrets 写成工作区里的 `.env`，但**不会把它打进镜像**（`.dockerignore` 已排除，镜像里也不该存密钥）。真正运行容器时用
+> `docker run --env-file .env -p 8000:8000 <镜像>` 注入；构建阶段只通过 `--build-arg APP_ENV` 把环境名写进镜像。
+
 `:sha-<提交号>` 这个标签很重要：任何一次上线都能对应到唯一的代码版本，出问题能精确回滚。
 
 ## 4. 本地模拟一次“部署”
@@ -85,8 +88,8 @@ Docker Hub Token 在这里生成：Docker Hub → Account settings → Security 
 # 构建 staging 镜像
 docker build --build-arg APP_ENV=staging -t car-price-mlops:staging .
 
-# 跑起来
-docker run -p 8000:8000 car-price-mlops:staging
+# 跑起来（.env 用 --env-file 注入，不打进镜像）
+docker run --env-file .env -p 8000:8000 car-price-mlops:staging
 
 # 验证
 curl http://127.0.0.1:8000/health
