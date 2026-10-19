@@ -1,4 +1,4 @@
-﻿# 二手车价格预测（Car Price MLOps Demo）
+# 二手车价格预测（Car Price MLOps Demo）
 
 一个很小的机器学习网站：填三个数字（年份、里程、排量），模型给出一个估价。
 
