@@ -14,12 +14,12 @@
 ```text
 car-price-mlops/
 |-- app/
-|   |-- main.py              # 网站后端：3 个接口
+|   |-- main.py              # 网站后端：4 个接口
 |   `-- static/index.html    # 网页（一个表单）
 |-- ml/
 |   |-- make_data.py         # 生成练习数据（v1 有脏数据，v2 是清洗后的）
 |   |-- data_pipeline.py     # 读 CSV，变成 X 和 y
-|   |-- train.py             # 训练两个模型 + 记录到 MLflow
+|   |-- train.py             # 训练三个模型 + 记录到 MLflow
 |   |-- configs/params.yaml  # 训练参数
 |   |-- registry/current_model.md   # 现在线上用的是哪个模型
 |   |-- README_data.md       # 数据说明（老师要求）
@@ -124,7 +124,10 @@ docker run -p 8000:8000 car-price-mlops
 dvc init
 dvc add data/cars_v1.csv
 dvc add data/cars_v2.csv
-dvc remote add -d storage D:\111\dvc-storage
+# 课程要求：远端用 MS Azure（本仓库已配置好，默认远端就是 mazure）
+dvc remote add -d mazure azure://dvc/car-price
+dvc remote modify mazure account_name wut2026
+dvc remote modify --local mazure sas_token "<SAS 令牌>"
 dvc push
 ```
 
@@ -132,7 +135,8 @@ dvc push
 - 两版数据的指纹（存在 `.dvc` 文件里）：v1 = `60c4feee…`，v2 = `c4de486c…`，和 `models/metrics.json` 里的 `dataset_hash` 对得上。
 - 数据被改坏时 `dvc status` 会报 `modified`，用 `dvc checkout --force` 还原。
 - 切换版本：`git checkout <提交号>` 再 `dvc checkout`；换台机器用 `dvc pull`。
-- 换 Azure 远端只要改一行：`dvc remote add -d storage azure://<容器>/car-price`
+- SAS 令牌用 `--local` 写进 `.dvc/config.local`（被 `.dvc/.gitignore` 忽略），`.dvc/config` 里只留地址和账户名。
+- 仓库里还留了一个本地远端 `storage`（`D:\111\dvc-storage`）作离线备用，用 `dvc push -r storage` 即可，不影响默认的 Azure 远端。
 
 > **Windows 提示**：如果 `dvc` 一运行就报 `[WinError 5] 拒绝访问: 'C:\ProgramData\iterative'`，说明 DVC 想在系统目录存配置但没有权限。用三个用户环境变量把它的目录指到自己账号下即可（不需要管理员）：
 >

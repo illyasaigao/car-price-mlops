@@ -160,10 +160,15 @@ dvc status              # Data and pipelines are up to date.
 
 ### 版本怎么对应
 
-| Git 提交 | 用的数据 | 说明 |
+| Git 提交 | 数据集版本 | 说明 |
 | --- | --- | --- |
-| 第一次提交 | v1 | 只有原始数据，4 行错误还在 |
-| 之后的提交 | v2 | 加了清洗和补充，训练改用 v2 |
+| `ab280f0`（第一次提交） | v2（`c4de486c…`） | 训练脚本从这时起就固定读 `data/cars_v2.csv` |
+| `39a02f3` | v1（`60c4feee…`）+ v2（`c4de486c…`） | DVC 第一次接管两版数据，两个 `.dvc` 指针在同一个提交里 |
+| `cf92eb5` | v2 | `models/metrics.json` 里记录的 `git_commit`：当前线上模型就是这次训练产出的 |
+| `5adb346` | v2 | 重新训练后更新指标记录 |
+
+v1 是清洗前的第一个可用版本，和 v2 一起长期保留：既能对比「清洗前后模型差多少」，也能在需要时回退。
+正式训练一直使用 v2。想复现 v1 上的效果，把 `ml/train.py` 里的 `DATA_PATH` 临时指向 `data/cars_v1.csv` 即可（`random_state` 固定，结果可复现）。
 
 用 `git log --oneline` 看提交号；用 `git show <提交号>:data/cars_v2.csv.dvc` 看当时那一版数据的哈希。
 每一版数据的哈希也记在 MLflow 的参数 `dataset_hash` 里，所以能回答“这个模型是用哪版数据训的”。

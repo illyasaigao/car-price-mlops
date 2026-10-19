@@ -68,7 +68,8 @@ python -m mlflow ui
 | 参数 | `model`、`feature_set`、`train_rows`、`test_rows` | 知道这次是怎么跑的 |
 | 参数 | `dataset_hash` | **用的是哪一版数据**（对应 DVC 的版本） |
 | 参数 | `git_commit` | **用的是哪一版代码** |
-| 参数 | `test_size`、`random_state`、`n_estimators`、`max_depth` | 超参数，复现实验要用 |
+| 参数 | `test_size`、`random_state` | 切分比例和随机种子，复现实验要用 |
+| 参数 | `n_estimators`、`max_depth` | 森林自己的超参数（只记在 `forest` 那次运行上） |
 | 指标 | `mae`、`r2` | 比较模型好坏 |
 | 文件 | `linear.pkl` / `linear_age2.pkl` / `forest.pkl` | 训练出来的模型本身 |
 
