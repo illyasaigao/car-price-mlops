@@ -28,9 +28,14 @@ feature_set = info["feature_set"]
 
 
 class CarInput(BaseModel):
-    """用户提交上来的三个数字，范围不对就直接报错 422。"""
+    """用户提交上来的三个数字，范围不对就直接报错 422。
 
-    year: int = Field(ge=1990, le=2026)
+    year 的范围故意收紧到 2005-2024：这是训练数据实际覆盖的区间。
+    超出去就是外推，二次项会把价格算高（1990 年反而比 2010 年贵），
+    所以干脆在接口层就挡住，不给用户不可信的结果。
+    """
+
+    year: int = Field(ge=2005, le=2024)
     mileage_km: int = Field(ge=0, le=500000)
     engine_l: float = Field(ge=0.5, le=8.0)
 

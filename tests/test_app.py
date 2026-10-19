@@ -58,6 +58,28 @@ def test_predict_rejects_year_too_old():
     assert response.status_code == 422
 
 
+def test_predict_rejects_year_below_training_range():
+    """1990 年超出训练数据范围（2005-2024）-> 422。
+
+    为什么必须挡住：模型对 2005 年以前是外推，二次项会把价格算高，
+    实际会出现「1990 年比 2010 年贵」这种不可信结果。
+    """
+    response = client.post(
+        "/api/predict",
+        json={"year": 1990, "mileage_km": 100000, "engine_l": 2.0},
+    )
+    assert response.status_code == 422
+
+
+def test_predict_rejects_year_above_training_range():
+    """2025 年也超出训练范围（数据只到 2024）-> 422。"""
+    response = client.post(
+        "/api/predict",
+        json={"year": 2025, "mileage_km": 100000, "engine_l": 2.0},
+    )
+    assert response.status_code == 422
+
+
 def test_predict_rejects_wrong_type():
     """年份写成文字 -> 422。"""
     response = client.post(
