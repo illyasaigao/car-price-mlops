@@ -26,7 +26,7 @@ ml/make_data.py  ──生成──▶  data/cars_v1.csv (120 行，含 4 行脏
 | --- | --- | --- |
 | 代码 | git 提交号 | `models/metrics.json` 的 `git_commit`，以及 MLflow 的 `git_commit` 参数 |
 | 数据 | md5 前 8 位 `c4de486c` | `models/metrics.json` 的 `dataset_hash`，以及 MLflow 的 `dataset_hash` 参数 |
-| 训练参数 | `ml/configs/params.yaml` | MLflow 的 `test_size`、`random_state`、`n_estimators`、`max_depth` |
+| 训练参数 | `ml/configs/params.yaml` | MLflow 的 `test_size`、`random_state`，以及 `forest` 运行的 `n_estimators`、`max_depth` |
 | 模型 | `models/model.pkl` | MLflow 的 Artifacts 里也存了一份 |
 | 实验结果 | MAE 551 / R² 0.9933 | `models/metrics.json`、MLflow、`ml/registry/current_model.md` |
 
