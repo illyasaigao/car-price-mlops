@@ -102,7 +102,15 @@ def train_one(
         mlflow.log_artifact(str(model_path))
 
         print(f"{name:<12} MAE = {mae:6.0f}   R2 = {r2:.3f}")
-        return {"mae": mae, "r2": r2, "feature_set": feature_set, "model": model}
+        return {
+            "mae": mae,
+            "r2": r2,
+            "feature_set": feature_set,
+            "model": model,
+            # 记录真实切分后的行数：136 行按 8:2 切，sklearn 会得到 108 / 28
+            "train_rows": len(X_train),
+            "test_rows": len(X_test),
+        }
 
 
 def main():
@@ -169,8 +177,8 @@ def main():
         "dataset": DATA_PATH.name,
         "dataset_hash": data_hash,
         "git_commit": commit,
-        "train_rows": len(X_raw) - int(len(X_raw) * params["test_size"]),
-        "test_rows": int(len(X_raw) * params["test_size"]),
+        "train_rows": best["train_rows"],
+        "test_rows": best["test_rows"],
         "results": {
             name: {
                 "mae": round(r["mae"], 2),
