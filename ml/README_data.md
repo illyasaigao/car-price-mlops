@@ -164,8 +164,8 @@ dvc status              # Data and pipelines are up to date.
 | --- | --- | --- |
 | `ab280f0`（第一次提交） | v2（`c4de486c…`） | 训练脚本从这时起就固定读 `data/cars_v2.csv` |
 | `39a02f3` | v1（`60c4feee…`）+ v2（`c4de486c…`） | DVC 第一次接管两版数据，两个 `.dvc` 指针在同一个提交里 |
-| `cf92eb5` | v2 | `models/metrics.json` 里记录的 `git_commit`：当前线上模型就是这次训练产出的 |
-| `5adb346` | v2 | 重新训练后更新指标记录 |
+| `5adb346` | v2 | 上一次更新指标记录（`models/metrics.json` 里当时的 `git_commit` 是 `cf92eb5`） |
+| `0016d97` | v2 | 当前 `models/metrics.json` 里记录的 `git_commit`：现在线上这个模型就是这次训练产出的 |
 
 v1 是清洗前的第一个可用版本，和 v2 一起长期保留：既能对比「清洗前后模型差多少」，也能在需要时回退。
 正式训练一直使用 v2。想复现 v1 上的效果，把 `ml/train.py` 里的 `DATA_PATH` 临时指向 `data/cars_v1.csv` 即可（`random_state` 固定，结果可复现）。
