@@ -167,7 +167,7 @@ dvc status              # Data and pipelines are up to date.
 | `5adb346` | v2 | 上一次更新指标记录（`models/metrics.json` 里当时的 `git_commit` 是 `cf92eb5`） |
 | `0016d97` | v2 | 当前 `models/metrics.json` 里记录的 `git_commit`：现在线上这个模型就是这次训练产出的 |
 
-v1 是清洗前的第一个可用版本，和 v2 一起长期保留：既能对比「清洗前后模型差多少」，也能在需要时回退。
+v1 是清洗前的原始版本（含 4 行脏数据），和 v2 一起长期保留：既能对比「清洗前后模型差多少」，也能在需要时回退。
 正式训练一直使用 v2。想复现 v1 上的效果，把 `ml/train.py` 里的 `DATA_PATH` 临时指向 `data/cars_v1.csv` 即可（`random_state` 固定，结果可复现）。
 
 用 `git log --oneline` 看提交号；用 `git show <提交号>:data/cars_v2.csv.dvc` 看当时那一版数据的哈希。
