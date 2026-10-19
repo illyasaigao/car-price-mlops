@@ -1,4 +1,4 @@
-# 二手车价格预测（Car Price MLOps Demo）
+﻿# 二手车价格预测（Car Price MLOps Demo）
 
 一个很小的机器学习网站：填三个数字（年份、里程、排量），模型给出一个估价。
 
@@ -105,7 +105,7 @@ Test-Path .venv\Scripts\python.exe    # 必须输出 True
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-三个测试文件分别测：**接口**（正常 + 各种非法输入）、**模型**（预测是否合理）、**数据**（v1 有脏数据、v2 干净）。
+三个测试文件分别测：**接口**（正常 + 各种非法输入，含 1990/2025 年越界）、**模型**（预测是否合理）、**数据**（v1 有脏数据、v2 干净）。共 <b>19 个测试</b>。
 
 ## Docker
 
@@ -166,7 +166,7 @@ dvc push
 feature/*  --PR-->  dev  --PR-->  staging  --PR-->  main
 ```
 
-- 往 `dev` / `staging` / `main` 提 PR，CI 会自动跑：`ruff check`（lint）→ `ruff format --check`（格式）→ `pytest`（17 个测试）→ `docker build` → 起容器测 `/health`。
+- 往 `dev` / `staging` / `main` 提 PR，CI 会自动跑：`ruff check`（lint）→ `ruff format --check`（格式）→ `pytest`（19 个测试）→ `docker build` → 起容器测 `/health`。
 - 合并到 `staging`：`deploy.yml` 用 staging 的 secrets 生成 `.env`，构建 `:staging` 镜像。
 - 合并到 `main`：用生产 secrets 生成 `.env`，构建 `:latest` 和 `:sha-<提交号>` 镜像。
 
